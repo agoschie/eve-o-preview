@@ -65,6 +65,7 @@ namespace EveOPreview.View
 			this.DoubleBuffered = true;
 
 			InitializeComponent();
+			InitializeTouch();
 		}
 
 		private void OverlayArea_MouseEnter(object sender, EventArgs e)

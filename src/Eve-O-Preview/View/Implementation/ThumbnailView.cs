@@ -589,6 +589,14 @@ namespace EveOPreview.View
 
 		private void MouseEnter_Handler(object sender, EventArgs e)
 		{
+			if (!TouchInteraction.NextEventIsTouch)
+			{
+				TouchInteraction.MouseEnter = true;
+				if (TouchInteraction.IsPointerEnter()) return;
+			}
+			else
+				TouchInteraction.NextEventIsTouch = false;
+
 			this.ExitCustomMouseMode();
 			this.SaveWindowSizeAndLocation();
 
@@ -597,17 +605,40 @@ namespace EveOPreview.View
 
 		private void MouseLeave_Handler(object sender, EventArgs e)
 		{
-			this.ThumbnailLostFocus?.Invoke(this.Id);
+			if (!TouchInteraction.NextEventIsTouch)
+			{
+				TouchInteraction.MouseEnter = false;
+				if (TouchInteraction.IsPointerEnter()) return;
+			}
+			else
+				TouchInteraction.NextEventIsTouch = false;
+
+            this.ThumbnailLostFocus?.Invoke(this.Id);
 		}
 
 		private void MouseDown_Handler(object sender, MouseEventArgs e)
 		{
-			this.MouseDownEventHandler(e.Button, Control.ModifierKeys);
+			if (!TouchInteraction.NextEventIsTouch)
+			{
+				if (TouchInteraction.IsPointerDown()) return;
+				TouchInteraction.MouseDown = true;
+			}
+			else
+				TouchInteraction.NextEventIsTouch = false;
+
+            this.MouseDownEventHandler(e.Button, Control.ModifierKeys);
 		}
 
 		private void MouseMove_Handler(object sender, MouseEventArgs e)
 		{
-			if (this._isCustomMouseModeActive)
+			if (!TouchInteraction.NextEventIsTouch)
+			{
+				if (TouchInteraction.IsPointerDown()) return;
+			}
+			else
+				TouchInteraction.NextEventIsTouch = false;
+
+            if (this._isCustomMouseModeActive)
 			{
 				this.ProcessCustomMouseMode(e.Button.HasFlag(MouseButtons.Left), e.Button.HasFlag(MouseButtons.Right));
 			}
@@ -615,7 +646,15 @@ namespace EveOPreview.View
 
 		private void MouseUp_Handler(object sender, MouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Right)
+			if (!TouchInteraction.NextEventIsTouch)
+			{
+				if (!TouchInteraction.MouseDown) return;
+				TouchInteraction.MouseDown = false;
+			}
+            else
+                TouchInteraction.NextEventIsTouch = false;
+
+            if (e.Button == MouseButtons.Right)
 			{
 				this.ExitCustomMouseMode();
 
